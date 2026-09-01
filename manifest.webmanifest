@@ -1,0 +1,11 @@
+{
+  "name": "i41 证件水印",
+  "short_name": "证件水印",
+  "description": "纯前端本地证件防盗用水印工具",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#246bfd",
+  "icons": []
+}
