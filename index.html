@@ -54,7 +54,8 @@
         </div>
         <label>字号 <output id="sizeOut">自动</output><input id="fontSize" type="range" min="0" max="120" value="0"></label>
         <label>旋转角度 <output id="angleOut">-30°</output><input id="angle" type="range" min="-90" max="90" value="-30"></label>
-        <div class="grid two"><label>横向间距<input id="gapX" type="range" min="80" max="800" value="280"></label><label>纵向间距<input id="gapY" type="range" min="60" max="500" value="140"></label></div>
+        <label>水印数量 <output id="countOut">2 条</output><input id="count" type="range" min="1" max="3" value="2" step="1"></label>
+        <p class="tokens">默认两条更清晰；如需更强覆盖，可调整为三条。</p>
         <div class="actions"><button id="downloadCurrent" class="primary" disabled>下载当前</button><button id="downloadAll" class="primary" disabled>批量下载</button></div>
       </aside>
 

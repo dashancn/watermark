@@ -1,14 +1,12 @@
-export function calculateWatermarkGrid(width, height, gapX, gapY, angleDeg) {
-  const angle = Math.abs(angleDeg) * Math.PI / 180;
-  const extent = Math.ceil(Math.hypot(width, height) + Math.sin(angle) * Math.max(width, height));
-  const points = [];
-  let row = 0;
-  for (let y = -extent; y <= height + extent; y += Math.max(20, gapY)) {
-    const offset = row % 2 ? Math.max(20, gapX) / 2 : 0;
-    for (let x = -extent - offset; x <= width + extent; x += Math.max(20, gapX)) points.push({ x, y });
-    row += 1;
-  }
-  return points;
+export function calculateWatermarkPositions(width, height, requestedCount = 2) {
+  const count = Math.min(3, Math.max(1, Math.round(Number(requestedCount) || 2)));
+  const spacing = height * 0.24;
+  const centerY = height / 2;
+  const startY = centerY - spacing * (count - 1) / 2;
+  return Array.from({ length: count }, (_, index) => ({
+    x: width / 2,
+    y: Math.round(startY + spacing * index),
+  }));
 }
 
 export function sanitizeFilename(filename) {
@@ -40,7 +38,7 @@ export function drawWatermark(canvas, image, options) {
   ctx.font = `600 ${fontSize}px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  const grid = calculateWatermarkGrid(canvas.width, canvas.height, Number(options.gapX) || 280, Number(options.gapY) || 140, Number(options.angle) || -30);
-  for (const point of grid) ctx.fillText(options.text, point.x, point.y);
+  const positions = calculateWatermarkPositions(canvas.width, canvas.height, options.count);
+  for (const point of positions) ctx.fillText(options.text, point.x, point.y);
   ctx.restore();
 }

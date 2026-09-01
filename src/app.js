@@ -1,7 +1,7 @@
 import { drawWatermark, expandTemplate, sanitizeFilename } from './watermark.js';
 
 const $ = id => document.getElementById(id);
-const elements = Object.fromEntries(['fileInput','dropZone','fileList','fileCount','clearFiles','text','color','opacity','opacityOut','fontSize','sizeOut','angle','angleOut','gapX','gapY','downloadCurrent','downloadAll','preview','empty','thumbs','currentName'].map(id => [id,$(id)]));
+const elements = Object.fromEntries(['fileInput','dropZone','fileList','fileCount','clearFiles','text','color','opacity','opacityOut','fontSize','sizeOut','angle','angleOut','count','countOut','downloadCurrent','downloadAll','preview','empty','thumbs','currentName'].map(id => [id,$(id)]));
 const state = { files: [], active: 0, image: null, imageUrl: null, renderId: 0 };
 
 function options(file) {
@@ -11,8 +11,7 @@ function options(file) {
     opacity: Number(elements.opacity.value) / 100,
     fontSize: Number(elements.fontSize.value),
     angle: Number(elements.angle.value),
-    gapX: Number(elements.gapX.value),
-    gapY: Number(elements.gapY.value),
+    count: Number(elements.count.value),
   };
 }
 
@@ -74,7 +73,7 @@ elements.dropZone.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
 elements.clearFiles.onclick=()=>{state.files=[];state.active=0;refreshFiles();render()};
 document.querySelectorAll('[data-template]').forEach(button=>button.onclick=()=>{elements.text.value=button.dataset.template;render()});
 document.querySelectorAll('[data-token]').forEach(button=>button.onclick=()=>{elements.text.value+=button.dataset.token;render()});
-for(const id of ['text','color','opacity','fontSize','angle','gapX','gapY']) elements[id].addEventListener('input',()=>{elements.opacityOut.value=`${elements.opacity.value}%`;elements.sizeOut.value=elements.fontSize.value==='0'?'自动':`${elements.fontSize.value}px`;elements.angleOut.value=`${elements.angle.value}°`;render()});
+for(const id of ['text','color','opacity','fontSize','angle','count']) elements[id].addEventListener('input',()=>{elements.opacityOut.value=`${elements.opacity.value}%`;elements.sizeOut.value=elements.fontSize.value==='0'?'自动':`${elements.fontSize.value}px`;elements.angleOut.value=`${elements.angle.value}°`;elements.countOut.value=`${elements.count.value} 条`;render()});
 elements.downloadCurrent.onclick=async()=>{const file=state.files[state.active];downloadBlob(await exportFile(file),sanitizeFilename(file.name))};
 elements.downloadAll.onclick=async()=>{elements.downloadAll.disabled=true;for(const file of state.files){downloadBlob(await exportFile(file),sanitizeFilename(file.name));await new Promise(r=>setTimeout(r,180))}elements.downloadAll.disabled=false};
 
