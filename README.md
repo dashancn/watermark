@@ -12,6 +12,17 @@
 - 实名认证、入职审核、银行开户等模板
 - PWA离线使用
 - 无后端、无远程模型、无分析脚本
+- i41 工具生态导航：i方案、开发者工具、图片压缩、PDF 工具、证件照、临时剪贴板
+
+## i41 工具生态
+
+- [i方案](https://www.i41.cn)
+- [开发者工具](https://tools.i41.cn)
+- [图片压缩](https://imgzip.i41.cn)
+- [PDF 工具](https://pdf.i41.cn)
+- [证件照](https://idphoto.i41.cn)
+- [临时剪贴板](https://clip.i41.cn)
+- [证件水印](https://watermark.i41.cn)
 
 ## 开发
 
