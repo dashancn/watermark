@@ -30,6 +30,22 @@ test('页面包含完整工具生态、模板、批量和隐私说明', async ()
   for (const text of ['临时剪贴板','客户端加密、自动过期、读取次数限制和阅后即焚','仅供实名认证使用，他用无效','仅供入职审核使用，他用无效','仅供银行开户使用，他用无效','水印数量','value="2"','批量下载','图片仅在浏览器本地处理']) assert.ok(html.includes(text));
 });
 
+test('顶部生态导航的 i方案入口携带来源与位置 UTM', async () => {
+  const html = await read('index.html');
+  assert.match(html, /<nav[^>]*>[\s\S]*?<a class="featured" href="https:\/\/www\.i41\.cn\?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=ifangan&amp;utm_content=ecosystem_nav"[^>]*>i方案<\/a>/);
+});
+
+test('浅黄色推广横幅的 i方案入口使用 promo_banner UTM', async () => {
+  const html = await read('index.html');
+  assert.match(html, /<aside class="iplan">[\s\S]*?<a href="https:\/\/www\.i41\.cn\?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=ifangan&amp;utm_content=promo_banner"[^>]*>访问 i方案 →<\/a>/);
+});
+
+test('页面展示 i41 免费实用工具归属且保留 MIT 声明', async () => {
+  const html = await read('index.html');
+  assert.match(html, />[^<]*i41 免费实用工具[^<]*</);
+  assert.match(html, /MIT License/);
+});
+
 test('PWA 与开源文件完整', async () => {
   const [html, manifest, sw, license] = await Promise.all([read('index.html'),read('manifest.webmanifest'),read('sw.js'),read('LICENSE')]);
   assert.match(html,/manifest\.webmanifest/);
