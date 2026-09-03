@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { calculateWatermarkPositions, sanitizeFilename } from '../src/watermark.js';
+import { calculateWatermarkPositions, calculateResponsiveFontSize, clampWatermarkOffset, sanitizeFilename, shouldRecommendCompression } from '../src/watermark.js';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
@@ -20,8 +20,34 @@ test('水印数量允许在一至三条范围内调整', () => {
   assert.equal(calculateWatermarkPositions(1200, 800, 99).length, 3);
 });
 
+test('自动字号随图片分辨率增长并保持可读比例', () => {
+  assert.equal(calculateResponsiveFontSize(1200, 800), 36);
+  assert.equal(calculateResponsiveFontSize(6000, 4000), 180);
+  assert.equal(calculateResponsiveFontSize(12000, 8000), 360);
+});
+
+test('手动拖放偏移被限制在画布范围内', () => {
+  assert.deepEqual(clampWatermarkOffset(1200, 800, { x: 900, y: -900 }), { x: 540, y: -360 });
+  assert.deepEqual(clampWatermarkOffset(1200, 800, { x: 120, y: 80 }), { x: 120, y: 80 });
+});
+
+test('大文件或超高像素图片会建议先压缩', () => {
+  assert.equal(shouldRecommendCompression({ size: 2 * 1024 * 1024 }, 1200, 800), false);
+  assert.equal(shouldRecommendCompression({ size: 12 * 1024 * 1024 }, 1200, 800), true);
+  assert.equal(shouldRecommendCompression({ size: 2 * 1024 * 1024 }, 5000, 4000), true);
+});
+
 test('导出文件名安全且保留扩展名', () => {
   assert.equal(sanitizeFilename('身份证 正面.jpg'), '身份证-正面-watermarked.png');
+});
+
+test('页面提供拖动定位和大图压缩确认界面', async () => {
+  const [html, app] = await Promise.all([read('index.html'), read('src/app.js')]);
+  for (const text of ['拖动水印调整位置', '检测到较大的图片', '先去压缩', '继续加水印']) assert.ok(html.includes(text));
+  assert.match(html, /https:\/\/imgzip\.i41\.cn\/\?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=i41_tools&amp;utm_content=large_image_prompt/);
+  assert.match(app, /pointerdown/);
+  assert.match(app, /pointermove/);
+  assert.match(app, /shouldRecommendCompression/);
 });
 
 test('页面包含完整工具生态、模板、批量和隐私说明', async () => {

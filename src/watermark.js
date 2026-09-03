@@ -9,6 +9,23 @@ export function calculateWatermarkPositions(width, height, requestedCount = 2) {
   }));
 }
 
+export function calculateResponsiveFontSize(width, height) {
+  return Math.max(18, Math.round(Math.min(Number(width) || 0, Number(height) || 0) * 0.045));
+}
+
+export function clampWatermarkOffset(width, height, offset = {}) {
+  const maxX = Math.round(width * 0.45);
+  const maxY = Math.round(height * 0.45);
+  return {
+    x: Math.round(Math.min(maxX, Math.max(-maxX, Number(offset.x) || 0))),
+    y: Math.round(Math.min(maxY, Math.max(-maxY, Number(offset.y) || 0))),
+  };
+}
+
+export function shouldRecommendCompression(file, width, height) {
+  return Number(file?.size || 0) >= 10 * 1024 * 1024 || Number(width || 0) * Number(height || 0) >= 16_000_000;
+}
+
 export function sanitizeFilename(filename) {
   const stem = String(filename || 'image').replace(/\.[^.]+$/, '').trim().replace(/\s+/g, '-').replace(/[\\/:*?"<>|]/g, '-');
   return `${stem || 'image'}-watermarked.png`;
@@ -28,7 +45,9 @@ export function drawWatermark(canvas, image, options) {
   canvas.height = image.naturalHeight || image.height;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-  const fontSize = Math.max(12, Number(options.fontSize) || Math.round(Math.min(canvas.width, canvas.height) * 0.045));
+  const fontSize = Number(options.fontSize) > 0
+    ? Math.max(12, Number(options.fontSize) * Math.max(1, Math.min(canvas.width, canvas.height) / 1200))
+    : calculateResponsiveFontSize(canvas.width, canvas.height);
   ctx.save();
   ctx.translate(canvas.width / 2, canvas.height / 2);
   ctx.rotate((Number(options.angle) || -30) * Math.PI / 180);
@@ -38,7 +57,9 @@ export function drawWatermark(canvas, image, options) {
   ctx.font = `600 ${fontSize}px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  const positions = calculateWatermarkPositions(canvas.width, canvas.height, options.count);
+  const offset = clampWatermarkOffset(canvas.width, canvas.height, options.offset);
+  const positions = calculateWatermarkPositions(canvas.width, canvas.height, options.count)
+    .map(point => ({ x: point.x + offset.x, y: point.y + offset.y }));
   for (const point of positions) ctx.fillText(options.text, point.x, point.y);
   ctx.restore();
 }

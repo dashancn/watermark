@@ -1,8 +1,8 @@
-import { drawWatermark, expandTemplate, sanitizeFilename } from './watermark.js';
+import { clampWatermarkOffset, drawWatermark, expandTemplate, sanitizeFilename, shouldRecommendCompression } from './watermark.js';
 
 const $ = id => document.getElementById(id);
-const elements = Object.fromEntries(['fileInput','dropZone','fileList','fileCount','clearFiles','text','color','opacity','opacityOut','fontSize','sizeOut','angle','angleOut','count','countOut','downloadCurrent','downloadAll','preview','empty','thumbs','currentName'].map(id => [id,$(id)]));
-const state = { files: [], active: 0, image: null, imageUrl: null, renderId: 0 };
+const elements = Object.fromEntries(['fileInput','dropZone','fileList','fileCount','clearFiles','text','color','opacity','opacityOut','fontSize','sizeOut','angle','angleOut','count','countOut','downloadCurrent','downloadAll','preview','empty','thumbs','currentName','dragHint','resetPosition','largeImageDialog','largeImageMessage','continueWatermark'].map(id => [id,$(id)]));
+const state = { files: [], active: 0, image: null, imageUrl: null, renderId: 0, offsets: new Map(), pendingFiles: [] };
 
 function options(file) {
   return {
@@ -12,6 +12,7 @@ function options(file) {
     fontSize: Number(elements.fontSize.value),
     angle: Number(elements.angle.value),
     count: Number(elements.count.value),
+    offset: state.offsets.get(file) || { x: 0, y: 0 },
   };
 }
 
@@ -34,6 +35,7 @@ async function render() {
   if (state.imageUrl) URL.revokeObjectURL(state.imageUrl);
   state.image = loaded.image; state.imageUrl = loaded.url;
   drawWatermark(elements.preview, state.image, options(file));
+  elements.dragHint.hidden = false;
   elements.empty.hidden = true;
   elements.currentName.textContent = file.name;
 }
@@ -52,9 +54,32 @@ function refreshFiles() {
   const enabled=state.files.length>0; elements.downloadCurrent.disabled=!enabled; elements.downloadAll.disabled=!enabled;
 }
 
-function addFiles(files) {
+async function splitLargeFiles(files) {
+  const regular=[]; const large=[];
+  for (const file of files) {
+    try {
+      const { image, url } = await loadImage(file);
+      (shouldRecommendCompression(file, image.naturalWidth, image.naturalHeight) ? large : regular).push(file);
+      URL.revokeObjectURL(url);
+    } catch { regular.push(file); }
+  }
+  return { regular, large };
+}
+
+function commitFiles(files) {
   const accepted=[...files].filter(file=>/^image\/(jpeg|png|webp)$/.test(file.type) && file.size<=30*1024*1024);
   state.files.push(...accepted); if(state.files.length===accepted.length) state.active=0; refreshFiles(); render();
+}
+
+async function addFiles(files) {
+  const accepted=[...files].filter(file=>/^image\/(jpeg|png|webp)$/.test(file.type) && file.size<=30*1024*1024);
+  const { regular, large } = await splitLargeFiles(accepted);
+  commitFiles(regular);
+  if (large.length) {
+    state.pendingFiles = large;
+    elements.largeImageMessage.textContent = `检测到 ${large.length} 张较大图片。大图直接加水印会产生更大的导出文件，是否先去压缩？`;
+    elements.largeImageDialog.showModal();
+  }
 }
 
 function exportFile(file) {
@@ -71,11 +96,29 @@ for(const type of ['dragenter','dragover']) elements.dropZone.addEventListener(t
 for(const type of ['dragleave','drop']) elements.dropZone.addEventListener(type,e=>{e.preventDefault();elements.dropZone.classList.remove('drag')});
 elements.dropZone.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
 elements.clearFiles.onclick=()=>{state.files=[];state.active=0;refreshFiles();render()};
+elements.continueWatermark.onclick=()=>{const files=state.pendingFiles.splice(0);elements.largeImageDialog.close();commitFiles(files)};
+elements.resetPosition.onclick=()=>{const file=state.files[state.active];if(file){state.offsets.set(file,{x:0,y:0});render()}};
 document.querySelectorAll('[data-template]').forEach(button=>button.onclick=()=>{elements.text.value=button.dataset.template;render()});
 document.querySelectorAll('[data-token]').forEach(button=>button.onclick=()=>{elements.text.value+=button.dataset.token;render()});
 for(const id of ['text','color','opacity','fontSize','angle','count']) elements[id].addEventListener('input',()=>{elements.opacityOut.value=`${elements.opacity.value}%`;elements.sizeOut.value=elements.fontSize.value==='0'?'自动':`${elements.fontSize.value}px`;elements.angleOut.value=`${elements.angle.value}°`;elements.countOut.value=`${elements.count.value} 条`;render()});
 elements.downloadCurrent.onclick=async()=>{const file=state.files[state.active];downloadBlob(await exportFile(file),sanitizeFilename(file.name))};
 elements.downloadAll.onclick=async()=>{elements.downloadAll.disabled=true;for(const file of state.files){downloadBlob(await exportFile(file),sanitizeFilename(file.name));await new Promise(r=>setTimeout(r,180))}elements.downloadAll.disabled=false};
+
+let drag;
+elements.preview.addEventListener('pointerdown',event=>{
+  const file=state.files[state.active]; if(!file||!state.image)return;
+  const current=state.offsets.get(file)||{x:0,y:0};
+  drag={file,startX:event.clientX,startY:event.clientY,current};
+  elements.preview.setPointerCapture(event.pointerId);
+});
+elements.preview.addEventListener('pointermove',event=>{
+  if(!drag)return;
+  const scaleX=elements.preview.width/elements.preview.getBoundingClientRect().width;
+  const scaleY=elements.preview.height/elements.preview.getBoundingClientRect().height;
+  state.offsets.set(drag.file,clampWatermarkOffset(elements.preview.width,elements.preview.height,{x:drag.current.x+(event.clientX-drag.startX)*scaleX,y:drag.current.y+(event.clientY-drag.startY)*scaleY}));
+  drawWatermark(elements.preview,state.image,options(drag.file));
+});
+for(const type of ['pointerup','pointercancel']) elements.preview.addEventListener(type,()=>{drag=null});
 
 refreshFiles();
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
