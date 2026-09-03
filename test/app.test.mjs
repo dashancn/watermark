@@ -44,11 +44,13 @@ test('隐私声明准确区分本地敏感处理与匿名统计', async () => {
   }
 });
 
-test('CSP 允许加载 i41 匿名统计并发送统计请求', async () => {
+test('CSP 允许加载两层匿名统计并发送统计请求', async () => {
   const headers = await read('_headers');
   const csp = headers.split('\n').find(line => line.includes('Content-Security-Policy:')) || '';
   assert.match(csp, /script-src[^;]*https:\/\/stats\.i41\.cn/);
   assert.match(csp, /connect-src[^;]*https:\/\/stats\.i41\.cn/);
+  assert.match(csp, /script-src[^;]*https:\/\/static\.cloudflareinsights\.com/);
+  assert.match(csp, /connect-src[^;]*https:\/\/cloudflareinsights\.com/);
 });
 
 test('顶部生态导航的 i方案入口携带来源与位置 UTM', async () => {

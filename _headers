@@ -2,7 +2,7 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://stats.i41.cn; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://stats.i41.cn; worker-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://stats.i41.cn https://static.cloudflareinsights.com; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://stats.i41.cn https://cloudflareinsights.com; worker-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'
 
 /sw.js
   Cache-Control: no-store, no-cache, must-revalidate
