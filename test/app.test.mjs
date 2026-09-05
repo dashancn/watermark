@@ -79,13 +79,44 @@ test('CSP 允许加载两层匿名统计并发送统计请求', async () => {
   assert.match(csp, /connect-src[^;]*https:\/\/cloudflareinsights\.com/);
 });
 
-test('顶部生态导航的 i方案入口携带来源与位置 UTM', async () => {
+test('顶部生态导航按统一顺序提供全量入口并标记当前站点', async () => {
   const html = await read('index.html');
-  assert.match(html, /<nav[^>]*>[\s\S]*?<a class="featured" href="https:\/\/www\.i41\.cn\?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=ifangan&amp;utm_content=ecosystem_nav"[^>]*>i方案<\/a>/);
+  const nav = html.match(/<nav aria-label="i41 工具生态">([\s\S]*?)<\/nav>/)?.[1] || '';
+  const labels = [...nav.matchAll(/<(?:a|span)[^>]*>([^<]+)<\/(?:a|span)>/g)].map(match => match[1]);
+  assert.deepEqual(labels, ['i方案', '开发者工具', '图片压缩', '智能抠图', '多图拼接', 'PDF 工具', '证件水印', '临时剪贴板', '证件照']);
+  for (const href of [
+    'https://www.i41.cn?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=ifangan&amp;utm_content=ecosystem_nav',
+    'https://tools.i41.cn',
+    'https://imgzip.i41.cn',
+    'https://imgzip.i41.cn/remove-background/',
+    'https://imgzip.i41.cn/collage/',
+    'https://pdf.i41.cn',
+    'https://clip.i41.cn',
+    'https://idphoto.i41.cn',
+  ]) assert.ok(nav.includes(`href="${href}"`), `缺少导航链接：${href}`);
+  assert.match(nav, /<span class="current" aria-current="page">证件水印<\/span>/);
+  assert.match(html, /<span class="privacy-badge"[^>]*>🔒 图片仅在本地处理<\/span>/);
 });
 
-test('浅黄色推广横幅的 i方案入口使用 promo_banner UTM', async () => {
+test('统一导航为白底 64px，i方案是主 CTA 且当前工具使用次级高亮', async () => {
+  const [html, css] = await Promise.all([read('index.html'), read('style.css')]);
+  assert.match(html, /<a class="primary-product" href="https:\/\/www\.i41\.cn\?[^>]*>i方案<\/a>/);
+  assert.match(css, /\.site-header\{[^}]*height:64px[^}]*background:#fff/);
+  assert.match(css, /\.site-header nav \.primary-product\{[^}]*background:#246bfd[^}]*color:#fff[^}]*font-weight:800/);
+  assert.match(css, /\.site-header nav \.current\{[^}]*background:#eaf0ff[^}]*color:#246bfd/);
+  assert.match(css, /\.privacy-badge\{[^}]*background:#eaf9f1[^}]*color:#18794e/);
+});
+
+test('移动端保持同一导航顺序并允许横向滚动访问全部入口', async () => {
+  const css = await read('style.css');
+  assert.match(css, /@media\(max-width:850px\)\{[^}]*\.site-header\{[^}]*height:auto[^}]*flex-wrap:wrap/);
+  assert.match(css, /@media\(max-width:850px\)[\s\S]*?\.site-header nav\{[^}]*order:3[^}]*width:100%[^}]*overflow-x:auto/);
+  assert.match(css, /@media\(max-width:850px\)[\s\S]*?\.privacy-badge\{[^}]*margin-left:auto/);
+});
+
+test('浅黄色推广横幅保留完整文案且使用 promo_banner UTM', async () => {
   const html = await read('index.html');
+  for (const text of ['关注 i方案', '获取内容创作、客户跟单、文生图与视频制作方案', '访问 i方案 →']) assert.ok(html.includes(text));
   assert.match(html, /<aside class="iplan">[\s\S]*?<a href="https:\/\/www\.i41\.cn\?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=ifangan&amp;utm_content=promo_banner"[^>]*>访问 i方案 →<\/a>/);
 });
 
