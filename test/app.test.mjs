@@ -99,12 +99,30 @@ test('顶部生态导航按标准顺序提供除当前证件水印外的入口',
   assert.match(html, /<span class="privacy-badge"[^>]*>🔒 图片仅在本地处理<\/span>/);
 });
 
-test('统一导航为白底 64px 且加宽 i方案主 CTA', async () => {
+test('i方案使用明确类名并由高优先级规则渲染为蓝底居中 CTA', async () => {
   const [html, css] = await Promise.all([read('index.html'), read('style.css')]);
-  assert.match(html, /<a class="primary-product"[^>]*data-tooltip="[^"]+"[^>]*>i方案<\/a>/);
-  assert.match(css, /\.site-header\{[^}]*height:64px[^}]*background:#fff/);
-  assert.match(css, /\.site-header nav \.primary-product\{[^}]*(?:min-width|padding):[^}]*background:#246bfd[^}]*color:#fff[^}]*font-weight:800/);
+  assert.match(html, /<a class="primary-product i-plan-link"[^>]*data-tooltip="[^"]+"[^>]*>i方案<\/a>/);
+  assert.match(css, /\.site-header\{[^}]*min-height:64px[^}]*background:#fff/);
+  const rule = css.match(/\.site-header nav a\.i-plan-link\{([^}]*)\}/)?.[1] || '';
+  for (const declaration of [
+    /background:#246bfd/,
+    /color:#fff/,
+    /min-width:(?:7[2-9]|[89]\d|\d{3,})px/,
+    /display:inline-flex/,
+    /align-items:center/,
+    /justify-content:center/,
+    /text-align:center/,
+    /border-radius:9px/,
+  ]) assert.match(rule, declaration);
   assert.match(css, /\.privacy-badge\{[^}]*background:#eaf9f1[^}]*color:#18794e/);
+});
+
+test('生态菜单整体右对齐并用自然换行代替横向滚动', async () => {
+  const css = await read('style.css');
+  const navRules = [...css.matchAll(/\.site-header nav\{([^}]*)\}/g)].map(match => match[1]).join(';');
+  assert.match(navRules, /justify-content:flex-end/);
+  assert.match(navRules, /flex-wrap:wrap/);
+  assert.doesNotMatch(navRules, /overflow-x:(?:auto|scroll)/);
 });
 
 test('所有菜单入口使用 hover 和 focus 可见的 data-tooltip', async () => {
@@ -124,10 +142,11 @@ test('页面链接全部在当前窗口打开且不携带新窗口 rel', async (
   assert.match(html, /<aside class="iplan">[\s\S]*?<a href="https:\/\/www\.i41\.cn\?[^>]*>访问 i方案 →<\/a>/);
 });
 
-test('移动端保持同一导航顺序并允许横向滚动访问全部入口', async () => {
+test('移动端保持同一导航顺序并允许自然换行访问全部入口', async () => {
   const css = await read('style.css');
   assert.match(css, /@media\(max-width:850px\)\{[^}]*\.site-header\{[^}]*height:auto[^}]*flex-wrap:wrap/);
-  assert.match(css, /@media\(max-width:850px\)[\s\S]*?\.site-header nav\{[^}]*order:3[^}]*width:100%[^}]*overflow-x:auto/);
+  assert.match(css, /@media\(max-width:850px\)[\s\S]*?\.site-header nav\{[^}]*order:3[^}]*width:100%[^}]*justify-content:flex-end[^}]*flex-wrap:wrap/);
+  assert.doesNotMatch(css, /@media\(max-width:850px\)[\s\S]*?\.site-header nav\{[^}]*overflow-x:(?:auto|scroll)/);
   assert.match(css, /@media\(max-width:850px\)[\s\S]*?\.privacy-badge\{[^}]*margin-left:auto/);
 });
 
