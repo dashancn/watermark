@@ -13,15 +13,14 @@
   <header class="site-header">
     <a class="brand" href="./"><span>水</span><strong>i41 证件水印</strong></a>
     <nav aria-label="i41 工具生态">
-      <a class="primary-product" href="https://www.i41.cn?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=ifangan&amp;utm_content=ecosystem_nav" target="_blank" rel="noopener noreferrer">i方案</a>
-      <a href="https://tools.i41.cn" target="_blank" rel="noopener noreferrer">开发者工具</a>
-      <a href="https://imgzip.i41.cn" target="_blank" rel="noopener noreferrer">图片压缩</a>
-      <a href="https://imgzip.i41.cn/remove-background/" target="_blank" rel="noopener noreferrer">智能抠图</a>
-      <a href="https://imgzip.i41.cn/collage/" target="_blank" rel="noopener noreferrer">多图拼接</a>
-      <a href="https://pdf.i41.cn" target="_blank" rel="noopener noreferrer">PDF 工具</a>
-      <span class="current" aria-current="page">证件水印</span>
-      <a href="https://clip.i41.cn" target="_blank" rel="noopener noreferrer" title="客户端加密、自动过期、读取次数限制和阅后即焚">临时剪贴板</a>
-      <a href="https://idphoto.i41.cn" target="_blank" rel="noopener noreferrer">证件照</a>
+      <a class="primary-product" href="https://www.i41.cn?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=ifangan&amp;utm_content=ecosystem_nav" data-tooltip="内容创作与客户跟单方案">i方案</a>
+      <a href="https://tools.i41.cn" data-tooltip="常用在线开发者工具">开发者工具</a>
+      <a href="https://imgzip.i41.cn" data-tooltip="本地批量压缩图片">图片压缩</a>
+      <a href="https://imgzip.i41.cn/remove-background/" data-tooltip="自动移除图片背景">智能抠图</a>
+      <a href="https://imgzip.i41.cn/collage/" data-tooltip="将多张图片快速拼接">多图拼接</a>
+      <a href="https://pdf.i41.cn" data-tooltip="合并、拆分与处理 PDF">PDF 工具</a>
+      <a href="https://clip.i41.cn" data-tooltip="客户端加密、自动过期、读取次数限制和阅后即焚">临时剪贴板</a>
+      <a href="https://idphoto.i41.cn" data-tooltip="在线制作标准证件照">证件照</a>
     </nav>
     <span class="privacy-badge" title="图片和水印文字不会上传到服务器">🔒 图片仅在本地处理</span>
   </header>
@@ -31,7 +30,7 @@
       <p class="eyebrow">纯前端 · 无需上传 · 支持离线</p>
       <h1>给敏感证件加上用途水印</h1>
       <p>身份证、营业执照、合同截图均在浏览器本地 Canvas 中处理。</p>
-      <aside class="iplan"><div><strong>关注 i方案</strong><span>获取内容创作、客户跟单、文生图与视频制作方案</span></div><a href="https://www.i41.cn?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=ifangan&amp;utm_content=promo_banner" target="_blank" rel="noopener noreferrer">访问 i方案 →</a></aside>
+      <aside class="iplan"><div><strong>关注 i方案</strong><span>获取内容创作、客户跟单、文生图与视频制作方案</span></div><a href="https://www.i41.cn?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=ifangan&amp;utm_content=promo_banner">访问 i方案 →</a></aside>
     </section>
 
     <section class="privacy">🔒 图片和水印文字仅在浏览器本地处理，不上传、不保存、不经过业务服务器。</section>
@@ -71,10 +70,10 @@
       </section>
     </section>
 
-    <section class="info-grid"><article><h2>防盗用提示</h2><p>水印可降低图片被挪作他用的风险，但不能替代对接收方资质和业务用途的核验。</p></article><article><h2>本地隐私</h2><p>图片和水印文字仅在浏览器本地处理。站点会发送匿名访问、性能、UTM 与跨站点击统计，不含图片、文件名、水印文字或永久标识。</p></article><article><h2>开源许可</h2><p>本项目原创代码采用 MIT License。<a href="https://github.com/dashancn/watermark" target="_blank" rel="noopener noreferrer">查看源码</a></p></article></section>
+    <section class="info-grid"><article><h2>防盗用提示</h2><p>水印可降低图片被挪作他用的风险，但不能替代对接收方资质和业务用途的核验。</p></article></section>
   </main>
-  <dialog id="largeImageDialog" class="large-image-dialog"><form method="dialog"><h2>检测到较大的图片</h2><p id="largeImageMessage">大图直接加水印会产生更大的导出文件，是否先去压缩？</p><div class="dialog-actions"><button id="continueWatermark" type="button" class="ghost">继续加水印</button><a class="primary-link" href="https://imgzip.i41.cn/?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=i41_tools&amp;utm_content=large_image_prompt" target="_blank" rel="noopener noreferrer">先去压缩 →</a></div></form></dialog>
-  <footer>i41 免费实用工具 · i41 证件水印 · 本地处理 · MIT License</footer>
+  <dialog id="largeImageDialog" class="large-image-dialog"><form method="dialog"><h2>检测到较大的图片</h2><p id="largeImageMessage">大图直接加水印会产生更大的导出文件，是否先去压缩？</p><div class="dialog-actions"><button id="continueWatermark" type="button" class="ghost">继续加水印</button><a class="primary-link" href="https://imgzip.i41.cn/?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=i41_tools&amp;utm_content=large_image_prompt">先去压缩 →</a></div></form></dialog>
+  <footer><span>i41 免费实用工具</span><details><summary>隐私与开源</summary><div><p>图片和水印文字仅在浏览器本地处理。站点会发送匿名访问、性能、UTM 与跨站点击统计，不含图片、文件名、水印文字或永久标识。</p><p>本项目原创代码采用 MIT License，<a href="https://github.com/dashancn/watermark">查看源码</a>。</p></div></details></footer>
   <script type="module" src="./src/app.js"></script>
   <script src="https://stats.i41.cn/analytics.js"></script>
 </body>
