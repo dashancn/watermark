@@ -83,11 +83,12 @@ test('顶部生态导航按标准顺序提供除当前证件水印外的入口',
   const html = await read('index.html');
   const nav = html.match(/<nav aria-label="i41 工具生态">([\s\S]*?)<\/nav>/)?.[1] || '';
   const labels = [...nav.matchAll(/<a[^>]*>([^<]+)<\/a>/g)].map(match => match[1]);
-  assert.deepEqual(labels, ['i方案', '开发者工具', '图片压缩', '智能抠图', '多图拼接', 'PDF 工具', '临时剪贴板', '证件照']);
+  assert.deepEqual(labels, ['i方案', '开发者工具', '图片压缩', 'HEIC 转换', '智能抠图', '多图拼接', 'PDF 工具', '临时剪贴板', '证件照']);
   for (const href of [
     'https://www.i41.cn?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=ifangan&amp;utm_content=ecosystem_nav',
     'https://tools.i41.cn',
     'https://imgzip.i41.cn',
+    'https://imgzip.i41.cn/heic-converter/',
     'https://imgzip.i41.cn/remove-background/',
     'https://imgzip.i41.cn/collage/',
     'https://pdf.i41.cn',
@@ -129,7 +130,7 @@ test('所有菜单入口使用 hover 和 focus 可见的 data-tooltip', async ()
   const [html, css] = await Promise.all([read('index.html'), read('style.css')]);
   const nav = html.match(/<nav aria-label="i41 工具生态">([\s\S]*?)<\/nav>/)?.[1] || '';
   const links = [...nav.matchAll(/<a\b([^>]*)>/g)];
-  assert.equal(links.length, 8);
+  assert.equal(links.length, 9);
   for (const [, attributes] of links) assert.match(attributes, /\bdata-tooltip="[^"]+"/);
   assert.match(css, /\[data-tooltip\]:(?:hover|focus-visible)::after/);
   assert.match(css, /\[data-tooltip\]:focus-visible::after/);
