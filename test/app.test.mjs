@@ -56,27 +56,26 @@ test('页面包含完整工具生态、模板、批量和隐私说明', async ()
   for (const text of ['临时剪贴板','客户端加密、自动过期、读取次数限制和阅后即焚','仅供实名认证使用，他用无效','仅供入职审核使用，他用无效','仅供银行开户使用，他用无效','水印数量','value="2"','批量下载','图片仅在浏览器本地处理']) assert.ok(html.includes(text));
 });
 
-test('页面加载 i41 匿名统计脚本并声明 watermark 站点', async () => {
+test('敏感文件页面不加载可变远程统计脚本', async () => {
   const html = await read('index.html');
   assert.match(html, /<html[^>]*data-i41-site="watermark"[^>]*>/);
-  assert.match(html, /<script[^>]*src="https:\/\/stats\.i41\.cn\/analytics\.js"[^>]*><\/script>/);
+  assert.doesNotMatch(html, /<script[^>]*src="https?:\/\//);
 });
 
-test('隐私声明准确区分本地敏感处理与匿名统计', async () => {
+test('隐私声明准确说明本地处理与同源 HEIC 资源', async () => {
   const [html, readme] = await Promise.all([read('index.html'), read('README.md')]);
   for (const content of [html, readme]) {
-    for (const text of ['图片和水印文字仅在浏览器本地处理', '匿名访问', '性能', 'UTM', '跨站点击', '不含图片、文件名、水印文字或永久标识']) assert.ok(content.includes(text), `缺少隐私说明：${text}`);
-    assert.doesNotMatch(content, /没有[^；。\n]*(?:分析脚本|分析)|无分析脚本/);
+    for (const text of ['图片和水印文字仅在浏览器本地处理', 'HEIC', '同源', '不发送']) assert.ok(content.includes(text), `缺少隐私说明：${text}`);
   }
 });
 
-test('CSP 允许加载两层匿名统计并发送统计请求', async () => {
+test('CSP 仅允许同源脚本并禁止运行时网络连接', async () => {
   const headers = await read('_headers');
   const csp = headers.split('\n').find(line => line.includes('Content-Security-Policy:')) || '';
-  assert.match(csp, /script-src[^;]*https:\/\/stats\.i41\.cn/);
-  assert.match(csp, /connect-src[^;]*https:\/\/stats\.i41\.cn/);
-  assert.match(csp, /script-src[^;]*https:\/\/static\.cloudflareinsights\.com/);
-  assert.match(csp, /connect-src[^;]*https:\/\/cloudflareinsights\.com/);
+  assert.match(csp, /script-src 'self'/);
+  assert.match(csp, /worker-src 'self'/);
+  assert.match(csp, /connect-src 'none'/);
+  assert.doesNotMatch(csp, /https:/);
 });
 
 test('顶部生态导航按标准顺序提供除当前证件水印外的入口', async () => {
@@ -171,6 +170,6 @@ test('PWA 与开源文件完整', async () => {
   const [html, manifest, sw, license] = await Promise.all([read('index.html'),read('manifest.webmanifest'),read('sw.js'),read('LICENSE')]);
   assert.match(html,/manifest\.webmanifest/);
   assert.match(manifest,/"display": "standalone"/);
-  assert.match(sw,/CACHE_NAME='i41-watermark-original-v3'/);
+  assert.match(sw,/CACHE_NAME='i41-watermark-original-v4'/);
   assert.match(license,/MIT License/);
 });

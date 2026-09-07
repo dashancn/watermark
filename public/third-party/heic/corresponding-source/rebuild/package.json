@@ -1,0 +1,17 @@
+{
+  "name": "squoosh-heic-converter",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "test:chromium": "node tests/chromium.mjs",
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "heic-to": "1.5.2"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.4",
+    "playwright-core": "1.55.0"
+  }
+}

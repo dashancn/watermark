@@ -5,25 +5,28 @@
 ## 特点
 
 - 图片和水印文字仅在浏览器本地处理，不上传、不保存、不经过业务服务器
-- 支持 JPG、PNG、WebP
+- 支持 JPG、PNG、WebP，并在检测到真实 HEIC/HEIF 文件签名后懒加载本站同源解码资源
+- 图片和水印文字不发送到统计或处理服务；敏感文件页面不加载可变远程统计脚本
 - 多图批量处理与下载
 - 水印文字、颜色、透明度、字号、角度、横纵间距
 - 日期、时间和文件名变量
 - 实名认证、入职审核、银行开户等模板
 - PWA离线使用
 - 无后端、无远程模型
-- i41 匿名统计会发送匿名访问、性能、UTM 与跨站点击数据，不含图片、文件名、水印文字或永久标识
-- i41 工具生态导航：i方案、开发者工具、图片压缩、PDF 工具、证件照、临时剪贴板
+- i41 工具生态导航：i方案、开发者工具、图片压缩、HEIC 转换、智能抠图、多图拼接、PDF 工具、临时剪贴板、证件照
 
 ## i41 工具生态
 
 - [i方案](https://www.i41.cn)
 - [开发者工具](https://tools.i41.cn)
 - [图片压缩](https://imgzip.i41.cn)
+- [HEIC 转换](https://imgzip.i41.cn/heic-converter/)
+- [智能抠图](https://imgzip.i41.cn/remove-background/)
+- [多图拼接](https://imgzip.i41.cn/collage/)
 - [PDF 工具](https://pdf.i41.cn)
-- [证件照](https://idphoto.i41.cn)
 - [临时剪贴板](https://clip.i41.cn)
 - [证件水印](https://watermark.i41.cn)
+- [证件照](https://idphoto.i41.cn)
 
 ## 开发
 

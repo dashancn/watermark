@@ -1,8 +1,11 @@
 import { clampWatermarkOffset, drawWatermark, expandTemplate, sanitizeFilename, shouldRecommendCompression } from './watermark.js';
+import { CACHE_KEY, VersionOwner, baseName, hasHeicSignature, readinessMessage, validateHeicFile, validateImageDimensions } from './heic-core.js';
 
 const $ = id => document.getElementById(id);
-const elements = Object.fromEntries(['fileInput','dropZone','fileList','fileCount','clearFiles','text','color','opacity','opacityOut','fontSize','sizeOut','angle','angleOut','count','countOut','downloadCurrent','downloadAll','preview','empty','thumbs','currentName','dragHint','resetPosition','largeImageDialog','largeImageMessage','continueWatermark'].map(id => [id,$(id)]));
+const elements = Object.fromEntries(['fileInput','dropZone','heicStatus','fileList','fileCount','clearFiles','text','color','opacity','opacityOut','fontSize','sizeOut','angle','angleOut','count','countOut','downloadCurrent','downloadAll','preview','empty','thumbs','currentName','dragHint','resetPosition','largeImageDialog','largeImageMessage','continueWatermark'].map(id => [id,$(id)]));
 const state = { files: [], active: 0, image: null, imageUrl: null, renderId: 0, offsets: new Map(), pendingFiles: [] };
+const selectionOwner = new VersionOwner();
+let activeHeicClient;
 
 function options(file) {
   return {
@@ -24,6 +27,48 @@ function loadImage(file) {
     image.onerror = () => { URL.revokeObjectURL(url); reject(new Error('无法读取图片')); };
     image.src = url;
   });
+}
+
+function showHeicStatus(message, error = false) {
+  elements.heicStatus.hidden = false;
+  elements.heicStatus.textContent = message;
+  elements.heicStatus.classList.toggle('error', error);
+}
+
+function hideHeicStatus() {
+  elements.heicStatus.hidden = true;
+  elements.heicStatus.textContent = '';
+  elements.heicStatus.classList.remove('error');
+}
+
+async function adaptFile(file, version) {
+  const header = new Uint8Array(await file.slice(0, Math.min(file.size, 128)).arrayBuffer());
+  if (!selectionOwner.isCurrent(version)) return null;
+  const heic = hasHeicSignature(header);
+  const heicNamed = /\.(heic|heif)$/i.test(file.name) || /image\/hei[cf]/i.test(file.type);
+  if (heicNamed && !heic) throw new Error('该文件不是有效的 HEIC/HEIF 图片');
+  if (!heic) return file;
+  validateHeicFile(file);
+  showHeicStatus(readinessMessage(localStorage));
+  const { HeicWorkerClient } = await import('./heic-worker-client.js');
+  if (!selectionOwner.isCurrent(version)) return null;
+  const client = new HeicWorkerClient({ workerUrl: new URL('../public/heic/heic-worker.js', import.meta.url) });
+  activeHeicClient = client;
+  try {
+    const result = await client.decode(file, validateImageDimensions);
+    if (!selectionOwner.isCurrent(version)) return null;
+    validateImageDimensions(result.width, result.height);
+    const converted = new File([result.buffer], `${baseName(file.name)}.png`, { type: 'image/png' });
+    const { image, url } = await loadImage(converted);
+    URL.revokeObjectURL(url);
+    if (image.naturalWidth !== result.width || image.naturalHeight !== result.height) throw new Error('PNG 尺寸校验失败');
+    localStorage.setItem(CACHE_KEY, '1');
+    showHeicStatus('HEIC/HEIF 已在浏览器本地转换为 PNG，可继续加水印。元数据/EXIF 可能不会保留。');
+    return converted;
+  } finally {
+    if (activeHeicClient === client) activeHeicClient = undefined;
+    client.terminate();
+  }
 }
 
 async function render() {
@@ -72,8 +117,23 @@ function commitFiles(files) {
 }
 
 async function addFiles(files) {
-  const accepted=[...files].filter(file=>/^image\/(jpeg|png|webp)$/.test(file.type) && file.size<=30*1024*1024);
+  const version = selectionOwner.next();
+  activeHeicClient?.terminate();
+  activeHeicClient = undefined;
+  hideHeicStatus();
+  const accepted=[];
+  for (const file of files) {
+    try {
+      const adapted = await adaptFile(file, version);
+      if (!selectionOwner.isCurrent(version)) return;
+      if (adapted && /^image\/(jpeg|png|webp)$/.test(adapted.type) && adapted.size<=30*1024*1024) accepted.push(adapted);
+    } catch (error) {
+      if (selectionOwner.isCurrent(version)) showHeicStatus(error?.message?.includes('20 MiB') || error?.message?.includes('有效的 HEIC') ? error.message : 'HEIC 解码失败，请确认文件有效，或检查资源后重试。', true);
+    }
+  }
+  if (!selectionOwner.isCurrent(version)) return;
   const { regular, large } = await splitLargeFiles(accepted);
+  if (!selectionOwner.isCurrent(version)) return;
   commitFiles(regular);
   if (large.length) {
     state.pendingFiles = large;
@@ -91,11 +151,11 @@ function exportFile(file) {
 
 function downloadBlob(blob,name) { const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000); }
 
-elements.fileInput.onchange=e=>addFiles(e.target.files);
+elements.fileInput.onchange=e=>{const files=e.target.files;elements.fileInput.value='';addFiles(files)};
 for(const type of ['dragenter','dragover']) elements.dropZone.addEventListener(type,e=>{e.preventDefault();elements.dropZone.classList.add('drag')});
 for(const type of ['dragleave','drop']) elements.dropZone.addEventListener(type,e=>{e.preventDefault();elements.dropZone.classList.remove('drag')});
 elements.dropZone.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
-elements.clearFiles.onclick=()=>{state.files=[];state.active=0;refreshFiles();render()};
+elements.clearFiles.onclick=()=>{selectionOwner.next();activeHeicClient?.terminate();activeHeicClient=undefined;hideHeicStatus();state.files=[];state.active=0;refreshFiles();render()};
 elements.continueWatermark.onclick=()=>{const files=state.pendingFiles.splice(0);elements.largeImageDialog.close();commitFiles(files)};
 elements.resetPosition.onclick=()=>{const file=state.files[state.active];if(file){state.offsets.set(file,{x:0,y:0});render()}};
 document.querySelectorAll('[data-template]').forEach(button=>button.onclick=()=>{elements.text.value=button.dataset.template;render()});
@@ -121,4 +181,5 @@ elements.preview.addEventListener('pointermove',event=>{
 for(const type of ['pointerup','pointercancel']) elements.preview.addEventListener(type,()=>{drag=null});
 
 refreshFiles();
+window.addEventListener('pagehide',()=>{selectionOwner.next();activeHeicClient?.terminate();activeHeicClient=undefined;if(state.imageUrl)URL.revokeObjectURL(state.imageUrl)});
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));

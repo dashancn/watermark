@@ -13,15 +13,15 @@
   <header class="site-header">
     <a class="brand" href="./"><span>水</span><strong>i41 证件水印</strong></a>
     <nav aria-label="i41 工具生态">
-      <a class="primary-product i-plan-link" href="https://www.i41.cn?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=ifangan&amp;utm_content=ecosystem_nav" data-tooltip="内容创作与客户跟单方案">i方案</a>
-      <a href="https://tools.i41.cn" data-tooltip="常用在线开发者工具">开发者工具</a>
-      <a href="https://imgzip.i41.cn" data-tooltip="本地批量压缩图片">图片压缩</a>
-      <a href="https://imgzip.i41.cn/heic-converter/" data-tooltip="在本地将 HEIC 图片转换为常用格式">HEIC 转换</a>
-      <a href="https://imgzip.i41.cn/remove-background/" data-tooltip="自动移除图片背景">智能抠图</a>
-      <a href="https://imgzip.i41.cn/collage/" data-tooltip="将多张图片快速拼接">多图拼接</a>
-      <a href="https://pdf.i41.cn" data-tooltip="合并、拆分与处理 PDF">PDF 工具</a>
-      <a href="https://clip.i41.cn" data-tooltip="客户端加密、自动过期、读取次数限制和阅后即焚">临时剪贴板</a>
-      <a href="https://idphoto.i41.cn" data-tooltip="在线制作标准证件照">证件照</a>
+      <a class="primary-product i-plan-link" href="https://www.i41.cn?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=ifangan&amp;utm_content=ecosystem_nav" data-tooltip="i方案是一套面向本地实体商家、内容运营人员和营销服务团队的智能内容工作平台。平台围绕行业、平台、品类、风格和使用场景，提供文案生成、文案诊断、客户跟单话术、文生图、视频包制作和精品模板等能力，帮助用户从内容构思、表单草稿、生成优化到后续复用形成完整工作链路。">i方案</a>
+      <a href="https://tools.i41.cn" data-tooltip="开发者工具箱汇集编码转换、格式化、加密、网络、文本和图片等常用在线工具，强调快速、易用和浏览器端处理。">开发者工具</a>
+      <a href="https://imgzip.i41.cn" data-tooltip="图片修改压缩是一款浏览器端在线图片处理工具，支持压缩、调整尺寸和格式转换，图片尽量在本地处理，适合日常上传、分享和网页优化。">图片压缩</a>
+      <a href="https://imgzip.i41.cn/heic-converter/" data-tooltip="HEIC 转换工具可在浏览器本地将 HEIC、HEIF 和 WebP 转为 JPG 或 PNG。">HEIC 转换</a>
+      <a href="https://imgzip.i41.cn/remove-background/" data-tooltip="智能抠图在浏览器中自动移除图片背景，适合人像和商品图快速换背景。">智能抠图</a>
+      <a href="https://imgzip.i41.cn/collage/" data-tooltip="多图拼接支持在浏览器中组合多张图片并调整布局。">多图拼接</a>
+      <a href="https://pdf.i41.cn" data-tooltip="PDF 工具箱提供合并、拆分、压缩、转换、编辑、OCR 和发票拼版等浏览器端 PDF 处理能力。">PDF 工具</a>
+      <a href="https://clip.i41.cn" data-tooltip="临时剪贴板支持客户端加密、自动过期、读取次数限制和阅后即焚，适合跨设备传递临时文本。">临时剪贴板</a>
+      <a href="https://idphoto.i41.cn" data-tooltip="证件照工作室是一款浏览器端证件照制作工具，支持本地智能抠图、背景换色、常用证件尺寸和 300DPI 多图拼版，照片无需上传到业务服务器。">证件照</a>
     </nav>
     <span class="privacy-badge" title="图片和水印文字不会上传到服务器">🔒 图片仅在本地处理</span>
   </header>
@@ -39,7 +39,8 @@
     <section class="workspace">
       <aside class="panel controls">
         <h2>1. 添加图片</h2>
-        <label class="drop" id="dropZone"><input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp" multiple><b>点击或拖入图片</b><small>支持 JPG、PNG、WebP，多图批量处理</small></label>
+        <label class="drop" id="dropZone"><input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,.heic,.heif,image/heic,image/heif" multiple><b>点击或拖入图片</b><small>支持 JPG、PNG、WebP、HEIC、HEIF，多图批量处理</small></label>
+        <p id="heicStatus" class="heic-status" hidden role="status"></p>
         <div class="file-head"><span id="fileCount">尚未添加图片</span><button id="clearFiles" class="ghost">清空</button></div>
         <div id="fileList" class="file-list"></div>
 
@@ -74,8 +75,7 @@
     <section class="info-grid"><article><h2>防盗用提示</h2><p>水印可降低图片被挪作他用的风险，但不能替代对接收方资质和业务用途的核验。</p></article></section>
   </main>
   <dialog id="largeImageDialog" class="large-image-dialog"><form method="dialog"><h2>检测到较大的图片</h2><p id="largeImageMessage">大图直接加水印会产生更大的导出文件，是否先去压缩？</p><div class="dialog-actions"><button id="continueWatermark" type="button" class="ghost">继续加水印</button><a class="primary-link" href="https://imgzip.i41.cn/?utm_source=watermark&amp;utm_medium=tool_referral&amp;utm_campaign=i41_tools&amp;utm_content=large_image_prompt">先去压缩 →</a></div></form></dialog>
-  <footer><span>i41 免费实用工具</span><details><summary>隐私与开源</summary><div><p>图片和水印文字仅在浏览器本地处理。站点会发送匿名访问、性能、UTM 与跨站点击统计，不含图片、文件名、水印文字或永久标识。</p><p>本项目原创代码采用 MIT License，<a href="https://github.com/dashancn/watermark">查看源码</a>。</p></div></details></footer>
+  <footer><span>i41 免费实用工具</span><details><summary>隐私与开源</summary><div><p>图片和水印文字仅在浏览器本地处理，不发送文件、文件名或水印文字。HEIC/HEIF 解码资源仅在检测到真实文件签名后从本站同源加载。</p><p>本项目原创代码采用 MIT License，<a href="https://github.com/dashancn/watermark">查看源码</a>。HEIC 支持使用 heic-to 1.5.2（LGPL-3.0，内含 libheif 1.22.2 与 libde265 1.0.16）；可查看<a href="./public/third-party/heic/BUILD-AND-RELINK.md">构建与重新链接说明</a>、<a href="./public/third-party/heic/corresponding-source/CORRESPONDING-SOURCE.md">对应源代码</a>和随附许可证。</p></div></details></footer>
   <script type="module" src="./src/app.js"></script>
-  <script src="https://stats.i41.cn/analytics.js"></script>
 </body>
 </html>
