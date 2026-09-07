@@ -30,7 +30,7 @@ test('picker and drop integration lazily convert only real HEIC signatures', asy
   assert.match(html, /支持 JPG、PNG、WebP、HEIC、HEIF/);
   assert.match(app, /hasHeicSignature/);
   assert.match(app, /await import\('\.\/heic-worker-client\.js'\)/);
-  assert.match(app, /elements\.fileInput\.onchange/);
+  assert.match(app, /elements\.fileInput\.onchange=e=>\{const files=\[\.\.\.e\.target\.files\]/);
   assert.match(app, /drop[\s\S]*addFiles/);
   assert.match(app, /selectionOwner/);
 });

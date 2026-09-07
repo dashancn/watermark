@@ -151,7 +151,7 @@ function exportFile(file) {
 
 function downloadBlob(blob,name) { const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000); }
 
-elements.fileInput.onchange=e=>{const files=e.target.files;elements.fileInput.value='';addFiles(files)};
+elements.fileInput.onchange=e=>{const files=[...e.target.files];elements.fileInput.value='';addFiles(files)};
 for(const type of ['dragenter','dragover']) elements.dropZone.addEventListener(type,e=>{e.preventDefault();elements.dropZone.classList.add('drag')});
 for(const type of ['dragleave','drop']) elements.dropZone.addEventListener(type,e=>{e.preventDefault();elements.dropZone.classList.remove('drag')});
 elements.dropZone.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
