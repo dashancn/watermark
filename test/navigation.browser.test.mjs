@@ -93,6 +93,13 @@ async function verifyNavigation({ width, height }) {
         navFont: getComputedStyle(links[1]).fontSize,
         documentWidth: document.documentElement.scrollWidth,
         viewportWidth: innerWidth,
+        navRight: nav.getBoundingClientRect().right,
+        rowRights: [...links.reduce((rows, link) => {
+          const rect = link.getBoundingClientRect();
+          const line = Math.round(rect.top + rect.height / 2);
+          rows.set(line, Math.max(rows.get(line) || 0, rect.right));
+          return rows;
+        }, new Map()).values()],
         rows: new Set(links.map(link => Math.round(link.getBoundingClientRect().top))).size
       };
     })()`);
@@ -100,7 +107,10 @@ async function verifyNavigation({ width, height }) {
     assert.equal(layout.headerTop, '0px');
     assert.equal(layout.navFont, width <= 520 ? '12px' : '13px');
     assert.equal(layout.documentWidth, layout.viewportWidth, '页面不应产生水平溢出');
-    if (width === 375) assert.ok(layout.rows > 1, '窄屏导航应自然换行');
+    if (width === 375) {
+      assert.ok(layout.rows > 1, '窄屏导航应自然换行');
+      assert.ok(layout.rowRights.every(right => Math.abs(layout.navRight - right) <= 1), '窄屏导航每一行都应靠右对齐');
+    }
 
     const count = await evaluate("document.querySelectorAll('.site-header nav a').length");
     for (let index = 0; index < count; index += 1) {
