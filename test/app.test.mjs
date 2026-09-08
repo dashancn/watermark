@@ -125,14 +125,15 @@ test('生态菜单整体右对齐并用自然换行代替横向滚动', async ()
   assert.doesNotMatch(navRules, /overflow-x:(?:auto|scroll)/);
 });
 
-test('所有菜单入口使用 hover 和 focus 可见的 data-tooltip', async () => {
-  const [html, css] = await Promise.all([read('index.html'), read('style.css')]);
+test('所有菜单入口使用 hover 和 focus 可见的 viewport-safe data-tooltip', async () => {
+  const [html, css, tooltip] = await Promise.all([read('index.html'), read('style.css'), read('src/nav-tooltip.js')]);
   const nav = html.match(/<nav aria-label="i41 工具生态">([\s\S]*?)<\/nav>/)?.[1] || '';
   const links = [...nav.matchAll(/<a\b([^>]*)>/g)];
   assert.equal(links.length, 9);
   for (const [, attributes] of links) assert.match(attributes, /\bdata-tooltip="[^"]+"/);
-  assert.match(css, /\[data-tooltip\]:(?:hover|focus-visible)::after/);
-  assert.match(css, /\[data-tooltip\]:focus-visible::after/);
+  assert.match(css, /\.nav-tooltip\{[^}]*position:fixed[^}]*white-space:normal/);
+  assert.match(tooltip, /addEventListener\('mouseover',[\s\S]*?placeNavTooltip/);
+  assert.match(tooltip, /addEventListener\('focusin',[\s\S]*?placeNavTooltip/);
 });
 
 test('页面链接全部在当前窗口打开且不携带新窗口 rel', async () => {
