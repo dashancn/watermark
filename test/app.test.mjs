@@ -56,6 +56,91 @@ test('页面包含完整工具生态、模板、批量和隐私说明', async ()
   for (const text of ['临时剪贴板','客户端加密、自动过期、读取次数限制和阅后即焚','仅供实名认证使用，他用无效','仅供入职审核使用，他用无效','仅供银行开户使用，他用无效','水印数量','value="2"','批量下载','图片仅在浏览器本地处理']) assert.ok(html.includes(text));
 });
 
+test('首页提供完整且一致的 canonical、OG 与 Twitter 元数据', async () => {
+  const html = await read('index.html');
+  const canonical = 'https://watermark.i41.cn/';
+  const image = 'https://watermark.i41.cn/og-watermark.png';
+  assert.match(html, new RegExp(`<link rel="canonical" href="${canonical}">`));
+  for (const [property, content] of [
+    ['og:type', 'website'],
+    ['og:locale', 'zh_CN'],
+    ['og:site_name', 'i41 证件水印'],
+    ['og:url', canonical],
+    ['og:title', 'i41 证件水印｜图片本地处理的防盗用水印工具'],
+    ['og:image', image],
+    ['og:image:secure_url', image],
+    ['og:image:type', 'image/png'],
+    ['og:image:width', '1200'],
+    ['og:image:height', '630'],
+  ]) assert.match(html, new RegExp(`<meta property="${property}" content="${content.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}">`));
+  for (const [name, content] of [
+    ['twitter:card', 'summary_large_image'],
+    ['twitter:title', 'i41 证件水印｜图片本地处理的防盗用水印工具'],
+    ['twitter:image', image],
+  ]) assert.match(html, new RegExp(`<meta name="${name}" content="${content.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}">`));
+  assert.match(html, /<meta (?:property="og:description"|name="twitter:description") content="[^"]+">/);
+});
+
+test('首页提供可解析的 WebApplication 结构化数据', async () => {
+  const html = await read('index.html');
+  const source = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
+  assert.ok(source, '缺少 JSON-LD');
+  const data = JSON.parse(source);
+  assert.equal(data['@context'], 'https://schema.org');
+  assert.equal(data['@type'], 'WebApplication');
+  assert.equal(data.name, 'i41 证件水印');
+  assert.equal(data.url, 'https://watermark.i41.cn/');
+  assert.equal(data.applicationCategory, 'UtilitiesApplication');
+  assert.equal(data.operatingSystem, 'Any');
+  assert.equal(data.inLanguage, 'zh-CN');
+  assert.equal(data.offers?.price, '0');
+  assert.equal(data.offers?.priceCurrency, 'CNY');
+  assert.ok(data.description.includes('浏览器本地处理'));
+  assert.deepEqual(data.featureList, ['本地图片处理', '用途水印实时预览', '多图批量下载', 'JPG、PNG、WebP、HEIC、HEIF 支持']);
+});
+
+test('社交分享图是 1200×630 的本地 PNG 资源', async () => {
+  const image = await readFile(new URL('../og-watermark.png', import.meta.url));
+  assert.deepEqual([...image.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+  assert.equal(image.readUInt32BE(16), 1200);
+  assert.equal(image.readUInt32BE(20), 630);
+});
+
+test('robots.txt 与 sitemap.xml 是有效的静态抓取入口', async () => {
+  const [robots, sitemap] = await Promise.all([read('robots.txt'), read('sitemap.xml')]);
+  assert.equal(robots, 'User-agent: *\nAllow: /\n\nSitemap: https://watermark.i41.cn/sitemap.xml\n');
+  assert.match(sitemap, /^<\?xml version="1\.0" encoding="UTF-8"\?>/);
+  assert.match(sitemap, /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/);
+  assert.match(sitemap, /<loc>https:\/\/watermark\.i41\.cn\/<\/loc>/);
+  assert.match(sitemap, /<changefreq>monthly<\/changefreq>/);
+  assert.match(sitemap, /<priority>1\.0<\/priority>/);
+  assert.doesNotMatch(robots, /<!doctype|<html/i);
+  assert.doesNotMatch(sitemap, /<!doctype|<html/i);
+});
+
+test('首页静态提供使用步骤、常见问题与安全边界说明', async () => {
+  const html = await read('index.html');
+  const steps = html.match(/<section class="seo-guide"[\s\S]*?<\/section>/)?.[0] || '';
+  const faq = html.match(/<section class="faq"[\s\S]*?<\/section>/)?.[0] || '';
+  for (const text of [
+    '证件水印怎么加',
+    '选择需要处理的图片',
+    '填写具体用途',
+    '调整水印并确认预览',
+    '下载处理后的图片',
+    '建议先保留原图备份',
+  ]) assert.ok(steps.includes(text), `步骤区缺少：${text}`);
+  for (const text of [
+    '图片会上传到服务器吗',
+    '不会。图片和水印文字仅在浏览器本地处理',
+    '水印能完全防止证件被盗用吗',
+    '不能。用途水印只能降低被挪用的风险',
+    '应该怎样写水印文字',
+    '仅供办理某项业务使用，他用无效',
+  ]) assert.ok(faq.includes(text), `FAQ 缺少：${text}`);
+  assert.doesNotMatch(`${steps}${faq}`, /身份证号|真实姓名|手机号码|住址示例|文件名示例/);
+});
+
 test('敏感文件页面不加载可变远程统计脚本', async () => {
   const html = await read('index.html');
   assert.match(html, /<html[^>]*data-i41-site="watermark"[^>]*>/);
@@ -171,6 +256,6 @@ test('PWA 与开源文件完整', async () => {
   const [html, manifest, sw, license] = await Promise.all([read('index.html'),read('manifest.webmanifest'),read('sw.js'),read('LICENSE')]);
   assert.match(html,/manifest\.webmanifest/);
   assert.match(manifest,/"display": "standalone"/);
-  assert.match(sw,/CACHE_NAME='i41-watermark-original-v4'/);
+  assert.match(sw,/CACHE_NAME='i41-watermark-original-v5'/);
   assert.match(license,/MIT License/);
 });

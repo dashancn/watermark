@@ -3,11 +3,54 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="图片仅在浏览器本地处理的证件防盗用水印工具">
+  <meta name="description" content="免费在线给身份证、营业执照、合同截图添加防盗用用途水印；JPG、PNG、WebP、HEIC 图片仅在浏览器本地处理，支持实时预览和批量下载。">
   <meta name="theme-color" content="#246bfd">
+  <link rel="canonical" href="https://watermark.i41.cn/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:site_name" content="i41 证件水印">
+  <meta property="og:url" content="https://watermark.i41.cn/">
+  <meta property="og:title" content="i41 证件水印｜图片本地处理的防盗用水印工具">
+  <meta property="og:description" content="免费为身份证、营业执照和合同截图添加用途水印。图片仅在浏览器本地处理，支持多种格式、实时预览和批量下载。">
+  <meta property="og:image" content="https://watermark.i41.cn/og-watermark.png">
+  <meta property="og:image:secure_url" content="https://watermark.i41.cn/og-watermark.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="i41 证件水印工具：本地处理图片并添加防盗用用途水印">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="i41 证件水印｜图片本地处理的防盗用水印工具">
+  <meta name="twitter:description" content="免费为敏感证件图片添加用途水印，图片仅在浏览器本地处理。">
+  <meta name="twitter:image" content="https://watermark.i41.cn/og-watermark.png">
+  <meta name="twitter:image:alt" content="i41 证件水印工具：本地处理图片并添加防盗用用途水印">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./style.css">
-  <title>i41 证件水印</title>
+  <title>i41 证件水印｜图片本地处理的防盗用水印工具</title>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "i41 证件水印",
+    "url": "https://watermark.i41.cn/",
+    "description": "免费为身份证、营业执照和合同截图添加用途水印，图片和水印文字仅在浏览器本地处理。",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires JavaScript and HTML5 Canvas",
+    "inLanguage": "zh-CN",
+    "image": "https://watermark.i41.cn/og-watermark.png",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "CNY"
+    },
+    "featureList": [
+      "本地图片处理",
+      "用途水印实时预览",
+      "多图批量下载",
+      "JPG、PNG、WebP、HEIC、HEIF 支持"
+    ]
+  }
+  </script>
 </head>
 <body>
   <header class="site-header">
@@ -70,6 +113,26 @@
         <div class="canvas-wrap"><canvas id="preview"></canvas><p id="empty">添加图片后在这里预览</p></div>
         <div id="thumbs" class="thumbs"></div>
       </section>
+    </section>
+
+    <section class="seo-guide" aria-labelledby="guide-title">
+      <div class="section-heading"><p class="eyebrow">简单四步</p><h2 id="guide-title">证件水印怎么加</h2><p>无需安装软件，在当前页面即可完成。建议先保留原图备份，再把加过明确用途水印的副本交给接收方。</p></div>
+      <ol class="step-list">
+        <li><strong>选择需要处理的图片</strong><span>点击或拖入 JPG、PNG、WebP、HEIC 或 HEIF 图片；支持一次选择多张。</span></li>
+        <li><strong>填写具体用途</strong><span>选择模板或输入限定用途的水印文字，避免只写“复印无效”等过于宽泛的表述。</span></li>
+        <li><strong>调整水印并确认预览</strong><span>根据图片底色调整颜色、透明度、字号和角度，确保关键信息仍可核验且水印不易被裁掉。</span></li>
+        <li><strong>下载处理后的图片</strong><span>确认用途和接收方无误后下载当前图片，或批量下载全部处理结果。</span></li>
+      </ol>
+    </section>
+
+    <section class="faq" aria-labelledby="faq-title">
+      <div class="section-heading"><p class="eyebrow">使用前了解</p><h2 id="faq-title">常见问题</h2></div>
+      <div class="faq-list">
+        <details><summary>图片会上传到服务器吗？</summary><p>不会。图片和水印文字仅在浏览器本地处理，不上传、不保存，也不发送文件内容、文件名或水印文字给统计服务。</p></details>
+        <details><summary>水印能完全防止证件被盗用吗？</summary><p>不能。用途水印只能降低被挪用的风险，不能替代对接收方身份、资质和实际业务用途的核验。请只向可信接收方提供必要材料。</p></details>
+        <details><summary>应该怎样写水印文字？</summary><p>建议写清接收方或办理事项，例如“仅供办理某项业务使用，他用无效”，并按需要加入日期。不要在水印中额外填写不必要的敏感信息。</p></details>
+        <details><summary>哪些图片格式可以处理？</summary><p>支持 JPG、PNG、WebP、HEIC 和 HEIF。HEIC/HEIF 解码组件仅在检测到真实文件签名后从本站同源加载。</p></details>
+      </div>
     </section>
 
     <section class="info-grid"><article><h2>防盗用提示</h2><p>水印可降低图片被挪作他用的风险，但不能替代对接收方资质和业务用途的核验。</p></article></section>

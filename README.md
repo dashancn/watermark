@@ -13,6 +13,7 @@
 - 实名认证、入职审核、银行开户等模板
 - PWA离线使用
 - 无后端、无远程模型
+- canonical、Open Graph / Twitter 分享图、WebApplication JSON-LD、robots.txt 与 sitemap.xml
 - i41 工具生态导航：i方案、开发者工具、图片压缩、HEIC 转换、智能抠图、多图拼接、PDF 工具、临时剪贴板、证件照
 
 ## i41 工具生态

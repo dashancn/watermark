@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://watermark.i41.cn/sitemap.xml
