@@ -228,6 +228,14 @@ test('页面链接全部在当前窗口打开且不携带新窗口 rel', async (
   assert.match(html, /<aside class="iplan">[\s\S]*?<a href="https:\/\/www\.i41\.cn\?[^>]*>访问 i方案 →<\/a>/);
 });
 
+test('移动端主标题保持中文词组完整并使用平衡换行', async () => {
+  const [html, css] = await Promise.all([read('index.html'), read('style.css')]);
+  assert.match(html, /<h1>给敏感证件加上<wbr><span>用途水印<\/span><\/h1>/);
+  assert.match(css, /\.hero h1\{[^}]*text-wrap:balance/);
+  assert.match(css, /\.hero h1 span\{[^}]*white-space:nowrap/);
+  assert.match(css, /@media\(max-width:520px\)[\s\S]*?\.hero h1\{[^}]*font-size:clamp\(30px,10vw,40px\)/);
+});
+
 test('移动端保持同一导航顺序并允许自然换行访问全部入口', async () => {
   const css = await read('style.css');
   assert.match(css, /@media\(max-width:850px\)\{[^}]*\.site-header\{[^}]*height:auto[^}]*flex-wrap:wrap/);
