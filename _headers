@@ -6,3 +6,7 @@
 
 /sw.js
   Cache-Control: no-store, no-cache, must-revalidate
+
+/404.html
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
